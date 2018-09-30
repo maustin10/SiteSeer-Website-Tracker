@@ -1,0 +1,12 @@
+{
+  "name": "siteseer",
+  "version": "1.0.0",
+  "description": "Send SMS notifications on site change via SHA1 checksum",
+  "dependencies": {
+    "cron": "^1.1.0",
+    "dotenv": "^1.2.0",
+    "request": "^2.88.0",
+    "node-telegram-bot-api": "latest",
+    "express": "latest"
+  }
+}
