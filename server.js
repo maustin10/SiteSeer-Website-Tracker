@@ -77,7 +77,7 @@ bot.onText(/\/list/,(msg)=>{
 		temp += ('\n'+ element+'\n');
 	})
 
-	temp += `\n\nUse " /subscribe sitename " to subscribe to notifs of that site\n\nUse " /unsub sitename " to unsubscribe`;
+	temp += `\n\nUse /watch sitename " to subscribe to notifs of that site\n\nUse /unsub sitename to unsubscribe`;
 
 	bot.sendMessage(msg.chat.id,temp)
 })
