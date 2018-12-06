@@ -21,4 +21,13 @@ My bot to track changes in websites. Deployed at t.me/siteseer_bot .
 /unsub {sitename} to unsubscribe from a website
 /list to get list of websites
 
-DM me at linkedin.com/in/akash-s-joshi to add websites to this list.
+## Components of the Bot
+
+1. The actual bot, which accepts regex and gives output.
+2. The site change checker, which converts the HTML of the site to a checksum and compares with prev checksum.
+3. A cronjob which runs the site change function every 15 minutes.
+
+## Tasklist
+
+- [ ] Compare a screenshot of the website instead of complete HTML
+- [ ] Send image with change notification, so user doesn't have to open site
