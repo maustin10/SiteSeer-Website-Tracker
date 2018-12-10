@@ -5,7 +5,10 @@ const TelegramBot = require('node-telegram-bot-api');
 const request = require('request')
 	,	cronJob = require('cron').CronJob
     , crypto = require('crypto')
+    , jsdom = require('jsdom')
     //, url = require('url')
+
+const { JSDOM } = jsdom;	
 const people = ['Akash']
 const admin = 475757469
 const token = process.env.TOKEN;
@@ -19,18 +22,20 @@ const checksum = (input) => {
 
 bot.sendMessage(admin,`Hello ${people} , the bot just re/started`)
 
-let sites = [{"url":"https://www.goethe.de/ins/in/en/sta/pun/prf/anm.html","chatId":["475757469"],"checksumString":""},{"url":"http://reg.fiitjee.co","chatId":[],"checksumString":""},{"url":"https://jeemain.nic.in/webinfo/Public/Home.aspx","chatId":[],"checksumString":""}];
+let sites = [{"url":"https://files.truecopy.in/viit/transcripthelp.html","chatId":[475757469],"checksumString":""},{"url":"http://results.unipune.ac.in","chatId":[475757469],"checksumString":""}];
 
-let siteList = ['https://www.goethe.de/ins/in/en/sta/pun/prf/anm.html','http://reg.fiitjee.co','https://jeemain.nic.in/webinfo/Public/Home.aspx'];
+let siteList = ['https://files.truecopy.in/viit/transcripthelp.html','http://results.unipune.ac.in'];
 
 bot.onText(/\/start/,(msg) =>{
     bot.sendMessage(msg.chat.id,
-		`Welcome to SiteSeer ! 
+		`Welcome to SiteSeer !
 		Made by www.linkedin.com/in/akash-s-joshi 👻. 
 
 		/list to list websites
-		/watch {sitename} to watch a site
-		/unsub {sitename} to unsubscribe from the site
+		/watch {sitename} to watch a site, without {}
+		/unsub {sitename} to unsubscribe from the site, without {}
+
+		Note : Doesn't work for dynamic sites like Instagram or Facebook.
 
 		Your chatid is ${msg.chat.id}`)
 })
@@ -38,6 +43,10 @@ bot.onText(/\/start/,(msg) =>{
 app.get('/', (req,res) => {
 	res.send(sites);
 });
+
+app.get('/s', (req,res) =>{
+	res.send(siteList)
+})
 
 // Matches "/echo [whatever]"
 bot.onText(/\/watch (.+)/, (msg, match) => {
@@ -47,7 +56,7 @@ bot.onText(/\/watch (.+)/, (msg, match) => {
     url = /^http(s)?:\/\//.test(url) ? url : `http://${url}`;
     if(siteList.indexOf(url) == -1){
 		siteList.push(url);
-		sites.push({url:url,chatId:[],checksumString:""})
+		sites.push({url:url,chatId:chatId,checksumString:""})
 	}
 		
 	sites.forEach((element)=>{
@@ -121,7 +130,7 @@ function batchWatch (){
 // Watch the site for changes...
 function siteWatcher(siteObject){
 	let userMessages = {
-        "SITE_HAS_CHANGED": `The site, ${siteObject.url}, has changed!`,
+        "SITE_HAS_CHANGED": `The site, ${siteObject.url}, might have changed!`,
         "SITE_IS_DOWN": `The site, ${siteObject.url}, is down!`
 	}
 
@@ -134,7 +143,8 @@ function siteWatcher(siteObject){
 			if(error){return console.error(error)}
 
 			if(response.statusCode < 400){
-				return siteObject.checksumString = checksum(body) 
+				const dom = new JSDOM(body)
+				return siteObject.checksumString = checksum(dom.window.document.querySelector('body').textContent.trim())
             } 
             else{
 				siteObject.chatId.forEach((element)=>{
@@ -151,18 +161,18 @@ function siteWatcher(siteObject){
 
 			if(response.statusCode < 400){
 				
-				let currentCheckSum = checksum(body)
+				const dom = new JSDOM(body)
+				let currentCheckSum = checksum(dom.window.document.querySelector('body').textContent.trim())
 				
 				if(siteObject.checksumString != currentCheckSum){
 					// They are not the same so send notification 
-					console.log(`Site ${siteObject.url} is not the same.`)
 					
 					// Update checkSumString's value
 					siteObject.checksumString = currentCheckSum
 
-						siteObject.chatId.forEach((element)=>{
-							bot.sendMessage(element,userMessages.SITE_HAS_CHANGED);
-						})
+					siteObject.chatId.forEach((element)=>{
+						bot.sendMessage(element,userMessages.SITE_HAS_CHANGED);
+					})
 				}
 				// else site still same
             }
